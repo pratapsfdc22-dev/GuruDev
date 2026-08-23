@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { z } from 'zod'
 
 const ChatRequestSchema = z.object({
@@ -11,23 +11,41 @@ const ChatRequestSchema = z.object({
   ),
 })
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+const placeholderText =
+  'Guru Dev pipeline not yet connected. Phase 3 will implement the full RAG pipeline with safety classification, query transformation, retrieval, generation, and verification.'
+
+export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await request.json()
-    const { message } = ChatRequestSchema.parse(body)
+    ChatRequestSchema.parse(body)
 
-    const placeholderResponse = {
-      message:
-        'Phase 1 scaffold complete. Chat pipeline will be implemented in Phase 3.',
-      citations: [],
-    }
+    const encoder = new TextEncoder()
 
-    return NextResponse.json(placeholderResponse)
+    const customReadable = new ReadableStream({
+      async start(controller) {
+        try {
+          for (let i = 0; i < placeholderText.length; i++) {
+            const char = placeholderText[i]
+            controller.enqueue(encoder.encode(char))
+            await new Promise((resolve) => setTimeout(resolve, 10))
+          }
+          controller.close()
+        } catch (error) {
+          controller.error(error)
+        }
+      },
+    })
+
+    return new Response(customReadable, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    })
   } catch (error) {
     console.error('Chat error:', error)
-    return NextResponse.json(
-      { error: 'Failed to process chat message' },
-      { status: 400 },
-    )
+    return new Response('Failed to process chat message', {
+      status: 400,
+    })
   }
 }
