@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import { ChatInterface } from '@/components/ChatInterface'
 
 export default function ChatPage(): React.ReactElement {
-  const [user, setUser] = useState<{ email: string } | null>(null)
+  const [user, setUser] = useState<{ email: string | undefined } | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
   const supabase = createClient()
@@ -18,12 +18,12 @@ export default function ChatPage(): React.ReactElement {
           data: { user },
         } = await supabase.auth.getUser()
 
-        if (!user) {
+        if (!user || !user.email) {
           router.push('/auth/signin')
           return
         }
 
-        setUser(user)
+        setUser({ email: user.email })
       } catch (error) {
         console.error('Error fetching user:', error)
         router.push('/auth/signin')
@@ -49,7 +49,7 @@ export default function ChatPage(): React.ReactElement {
   }
 
   if (!user) {
-    return null
+    return <div />
   }
 
   return (
