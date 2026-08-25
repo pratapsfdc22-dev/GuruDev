@@ -16,7 +16,9 @@
     "@supabase/ssr": "^0.12.4",
     "@anthropic-ai/sdk": "^0.20.8",
     "zod": "^3.22.4",
-    "langfuse": "^3.38.20"
+    "langfuse": "^3.38.20",
+    "linkedom": "^0.18.2",
+    "cheerio": "^1.0.0-rc.12"
   },
   "devDependencies": {
     "typescript": "^5.3.3",
