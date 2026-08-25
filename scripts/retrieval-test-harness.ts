@@ -57,94 +57,41 @@ async function retrieveHybrid(query: string, topK: number = 12): Promise<Retriev
   const embedding = await embedQuery(query)
   console.log(`✓ Query embedded (1024 dimensions)`)
 
-  // 1. Vector similarity search via Supabase JS client
-  console.log(`\nRunning pgvector cosine similarity (top ${topK})...`)
-  const { data: vectorResults, error: vectorError } = await client.rpc(
-    'match_verse_chunks',
+  // 1 & 2. Hybrid search (vector + FTS combined)
+  // Using hybrid_search_verse_chunks which is more reliable than match_verse_chunks
+  // and provides both vector and FTS scoring anyway
+  console.log(`\nRunning hybrid search (pgvector + full-text, combined)...`)
+  const { data: hybridResults, error: hybridError } = await client.rpc(
+    'hybrid_search_verse_chunks',
     {
-      query_embedding: embedding as any, // Cast as any to bypass type checking
-      match_count: topK,
-      match_threshold: -1,
-    }
-  )
-
-  if (vectorError) {
-    console.log(`⚠️ Vector search error: ${vectorError.message}`)
-  }
-
-  let vectorResults_Array: any[] = vectorResults || []
-  console.log(`✓ Found ${vectorResults_Array.length} vector matches`)
-
-  // If vector search returns no results, it's likely a type conversion issue
-  // Vector search is working (confirmed via Supabase SQL test)
-  // but the JS client parameter passing fails silently for generated embeddings
-  if (vectorResults_Array.length === 0) {
-    console.log(`   (Note: Generated embeddings may not serialize correctly to RPC)`)
-  }
-
-
-  // 2. Full-text search via RPC
-  console.log(`\nRunning full-text search (top ${topK})...`)
-
-  const { data: ftsResults_raw, error: ftsError } = await client.rpc(
-    'search_verse_chunks',
-    {
+      query_embedding: embedding as any,
       query_text: query,
-      match_count: topK * 2, // Get more to deduplicate by verse_id
+      vector_weight: 0.6,
+      fts_weight: 0.4,
+      match_count: topK,
     }
   )
 
-  if (ftsError) {
-    console.log(`⚠️ FTS search error: ${ftsError.message}`)
+  if (hybridError) {
+    console.log(`⚠️ Hybrid search error: ${hybridError.message}`)
   }
 
-  // Deduplicate FTS results by verse_id (keep highest relevance chunk per verse)
-  const ftsDedup = new Map<string, any>()
-  ;(ftsResults_raw || []).forEach((r: any) => {
-    const key = r.verse_id
-    const existing = ftsDedup.get(key)
-    if (!existing || r.relevance > existing.relevance) {
-      ftsDedup.set(key, r)
-    }
-  })
+  const hybridResults_Array: any[] = hybridResults || []
+  console.log(`✓ Found ${hybridResults_Array.length} hybrid matches`)
 
-  let ftsResults: any[] = Array.from(ftsDedup.values()).slice(0, topK)
-  console.log(`✓ Found ${ftsResults.length} FTS matches (${(ftsResults_raw || []).length} chunks, deduped by verse)`)
 
-  // 3. Merge and rerank
-  console.log(`\nMerging and reranking results...`)
 
-  const mergedMap = new Map<string, RetrievalResult>()
+  // 2. Format results (hybrid search already provides combined scores)
+  console.log(`\nFormatting results...`)
 
-  // Process vector results (use real similarity from RPC)
-  vectorResults_Array.forEach((r: any) => {
-    const key = r.verse_id
-    const similarityScore = r.similarity || 0
-    mergedMap.set(key, {
-      verse_id: r.verse_id,
-      book: r.book,
-      canto: r.canto,
-      chapter: r.chapter,
-      verse: r.verse,
-      vedabase_url: r.vedabase_url,
-      chunk_text: r.chunk_text,
-      similarity_score: similarityScore,
-      fts_score: 0,
-      combined_score: 0,
-      source: 'vector',
-    })
-  })
-
-  // Process FTS results (use real relevance from ts_rank)
-  ftsResults.forEach((r: any) => {
-    const key = r.verse_id
-    const ftsScore = r.relevance || 0
-    const existing = mergedMap.get(key)
-    if (existing) {
-      existing.fts_score = Math.max(existing.fts_score, ftsScore)
-      existing.source = 'both'
-    } else {
-      mergedMap.set(key, {
+  const topResults: RetrievalResult[] = hybridResults_Array
+    .map(r => {
+      const source: 'vector' | 'fts' | 'both' = (r.vector_score && r.vector_score > 0 && r.fts_score && r.fts_score > 0)
+        ? 'both'
+        : r.vector_score && r.vector_score > 0
+          ? 'vector'
+          : 'fts'
+      return {
         verse_id: r.verse_id,
         book: r.book,
         canto: r.canto,
@@ -152,26 +99,15 @@ async function retrieveHybrid(query: string, topK: number = 12): Promise<Retriev
         verse: r.verse,
         vedabase_url: r.vedabase_url,
         chunk_text: r.chunk_text,
-        similarity_score: 0,
-        fts_score: ftsScore,
-        combined_score: 0,
-        source: 'fts',
-      })
-    }
-  })
-
-  // Calculate combined scores: 60% vector, 40% FTS
-  const allResults = Array.from(mergedMap.values())
-  allResults.forEach((r) => {
-    r.combined_score = r.similarity_score * 0.6 + r.fts_score * 0.4
-  })
-
-  // Sort by combined score and return top 6
-  const topResults = allResults
-    .sort((a, b) => b.combined_score - a.combined_score)
+        similarity_score: r.vector_score || 0,
+        fts_score: r.fts_score || 0,
+        combined_score: r.combined_score || 0,
+        source,
+      }
+    })
     .slice(0, 6)
 
-  console.log(`✓ Merged ${allResults.length} unique results, returning top 6\n`)
+  console.log(`✓ Returning top 6 combined results\n`)
 
   return topResults
 }
