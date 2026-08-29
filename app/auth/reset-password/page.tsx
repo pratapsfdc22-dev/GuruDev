@@ -18,14 +18,27 @@ export default function ResetPasswordPage(): React.ReactElement {
   useEffect(() => {
     const verifyToken = async (): Promise<void> => {
       try {
+        // Supabase automatically handles the token from URL hash, but we need to wait for it
         const {
           data: { session },
         } = await supabase.auth.getSession()
 
-        if (session) {
+        // If there's a session, the token was valid and exchanged
+        if (session?.user) {
           setValidToken(true)
         } else {
-          setError('Invalid or expired reset link. Please request a new one.')
+          // Check if we're coming from a reset link (Supabase will set this up on auth state change)
+          const { data } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'PASSWORD_RECOVERY' && session) {
+              setValidToken(true)
+            } else if (!session && !validToken) {
+              setError('Invalid or expired reset link. Please request a new one.')
+            }
+          })
+
+          return () => {
+            data?.subscription?.unsubscribe()
+          }
         }
       } catch (err) {
         setError('Failed to verify reset link')
@@ -34,7 +47,7 @@ export default function ResetPasswordPage(): React.ReactElement {
     }
 
     verifyToken()
-  }, [supabase.auth])
+  }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
     e.preventDefault()
