@@ -18,20 +18,34 @@ RETURNS TABLE(
   similarity float
 ) AS $$
 BEGIN
+  SET LOCAL ivfflat.probes = 20;
   RETURN QUERY
+  WITH scored_chunks AS (
+    SELECT
+      vc.id,
+      vc.verse_id,
+      vc.book,
+      vc.canto,
+      vc.chapter,
+      vc.verse,
+      vc.vedabase_url,
+      vc.chunk_text,
+      (vc.embedding <=> query_embedding) as distance
+    FROM verse_chunks vc
+  )
   SELECT
-    vc.id,
-    vc.verse_id,
-    vc.book,
-    vc.canto,
-    vc.chapter,
-    vc.verse,
-    vc.vedabase_url,
-    vc.chunk_text,
-    1 - (vc.embedding <=> query_embedding) as similarity
-  FROM verse_chunks vc
-  WHERE vc.embedding <=> query_embedding < (1 - match_threshold)
-  ORDER BY vc.embedding <=> query_embedding
+    sc.id,
+    sc.verse_id,
+    sc.book,
+    sc.canto,
+    sc.chapter,
+    sc.verse,
+    sc.vedabase_url,
+    sc.chunk_text,
+    1 - sc.distance as similarity
+  FROM scored_chunks sc
+  WHERE sc.distance < (1 - match_threshold)
+  ORDER BY sc.distance
   LIMIT match_count;
 END;
 $$ LANGUAGE plpgsql;
@@ -100,6 +114,7 @@ RETURNS TABLE(
 DECLARE
   query_tsquery tsquery;
 BEGIN
+  SET LOCAL ivfflat.probes = 20;
   query_tsquery := plainto_tsquery('english', query_text);
 
   RETURN QUERY

@@ -1,8 +1,19 @@
 import { createClient } from '@supabase/supabase-js'
+import * as fs from 'fs'
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL
-const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
-const VOYAGE_API_KEY = process.env.VOYAGE_API_KEY
+// Load .env.local
+const envFile = fs.readFileSync('.env.local', 'utf-8')
+const envVars: Record<string, string> = {}
+envFile.split('\n').forEach(line => {
+  const [key, ...valueParts] = line.split('=')
+  if (key && valueParts.length > 0) {
+    envVars[key.trim()] = valueParts.join('=').trim()
+  }
+})
+
+const SUPABASE_URL = envVars.NEXT_PUBLIC_SUPABASE_URL
+const SUPABASE_SERVICE_KEY = envVars.SUPABASE_SERVICE_ROLE_KEY
+const VOYAGE_API_KEY = envVars.VOYAGE_API_KEY
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY || !VOYAGE_API_KEY) {
   console.error('Missing required environment variables')
