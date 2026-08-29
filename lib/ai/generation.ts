@@ -26,6 +26,9 @@ export const GenerationResponseSchema = z.object({
     .describe('Structured citations from retrieved verses, only those actually cited in message'),
 })
 
+// Re-export for use in other modules
+export { GenerationResponseSchema as GenerationResponseSchemaExport }
+
 export type Citation = z.infer<typeof CitationSchema>
 export type GenerationResponse = z.infer<typeof GenerationResponseSchema>
 
