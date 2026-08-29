@@ -85,7 +85,7 @@ function streamText(text: string): ReadableStream<Uint8Array> {
 export async function POST(request: NextRequest): Promise<Response> {
   try {
     const body = await request.json()
-    const { message, messages } = ChatRequestSchema.parse(body)
+    const { message } = ChatRequestSchema.parse(body)
 
     // STEP 1: Safety classification (BEFORE anything else)
     const safety = await classifySafety(message)
