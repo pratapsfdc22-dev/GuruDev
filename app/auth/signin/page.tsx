@@ -96,6 +96,12 @@ export default function SignInPage(): React.ReactElement {
           </button>
         </form>
 
+        <div className="text-center text-sm">
+          <Link href="/auth/forgot-password" className="text-blue-600 hover:underline">
+            Forgot password?
+          </Link>
+        </div>
+
         <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           Don't have an account?{' '}
           <Link href="/auth/signup" className="text-blue-600 hover:underline">
