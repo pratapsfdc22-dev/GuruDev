@@ -1,6 +1,9 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { classifySafety } from '@/lib/ai/safety'
+import { transformQuery } from '@/lib/ai/query-transform'
+import { retrieveVerses } from '@/lib/ai/retrieval'
+import { generateAndVerify } from '@/lib/ai/verification'
 
 const ChatRequestSchema = z.object({
   message: z.string(),
@@ -35,12 +38,30 @@ I'm not able to provide mental health support, but the trained counselors at the
 
 You deserve support and care. Please reach out today.`
 
-const HELPLINE_REGION_MAP: Record<string, string> = {
-  US: '📞 Call 988 or text 988',
-  UK: '📞 Call 116 123 (Samaritans)',
-  CA: '📞 Call 1-833-456-4566 (Canada Suicide Prevention Service)',
-  AU: '📞 Call 13 11 14 (Lifeline Australia)',
-  IN: '📞 Call +91-9152987821 (iCall)',
+interface StreamMessage {
+  type: 'message' | 'citations' | 'error' | 'done'
+  data?: any
+}
+
+function streamJSON(messages: StreamMessage[]): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder()
+  let messageIndex = 0
+
+  return new ReadableStream({
+    async start(controller) {
+      try {
+        for (const msg of messages) {
+          const json = JSON.stringify(msg) + '\n'
+          controller.enqueue(encoder.encode(json))
+          // Small delay to allow client to process
+          await new Promise((resolve) => setTimeout(resolve, 10))
+        }
+        controller.close()
+      } catch (error) {
+        controller.error(error)
+      }
+    },
+  })
 }
 
 function streamText(text: string): ReadableStream<Uint8Array> {
@@ -81,25 +102,89 @@ export async function POST(request: NextRequest): Promise<Response> {
       })
     }
 
-    // STEP 3: SENSITIVE or SAFE - Proceed to RAG pipeline
-    // TODO: Phase 3 - Implement full RAG pipeline
-    // - Query transformation (Haiku)
-    // - Retrieval (hybrid search)
-    // - Generation (Sonnet) with safety flag
-    // - Verification
-    const placeholderText = `[Safety: ${safety.classification}] Guru Dev pipeline not yet connected. Phase 3 will implement query transformation, retrieval, generation, and verification.`
+    // STEP 3: SAFE/SENSITIVE - Full RAG pipeline
+    const isSensitive = safety.classification === 'sensitive'
 
-    return new Response(streamText(placeholderText), {
-      headers: {
-        'Content-Type': 'text/plain; charset=utf-8',
-        'Transfer-Encoding': 'chunked',
-        'X-Safety-Flag': safety.classification,
-      },
-    })
+    try {
+      // Step 3a: Query transformation
+      const transformation = await transformQuery(message, isSensitive)
+
+      // Step 3b: Retrieval
+      const retrievedVerses = await retrieveVerses(transformation.search_queries, 12)
+
+      // Step 3c: Generation + Verification
+      const { response, verification } = await generateAndVerify(
+        message,
+        transformation.vedic_concepts,
+        retrievedVerses,
+        isSensitive,
+        1, // 1 retry if fabrication detected
+      )
+
+      // Build streaming response
+      const streamMessages: StreamMessage[] = [
+        {
+          type: 'message',
+          data: {
+            content: response.message,
+            citations: response.citations,
+          },
+        },
+        {
+          type: 'done',
+          data: {
+            verified: verification.isValid,
+            groundedCitations: verification.groundedCitations,
+          },
+        },
+      ]
+
+      return new Response(streamJSON(streamMessages), {
+        headers: {
+          'Content-Type': 'application/x-ndjson; charset=utf-8',
+          'Transfer-Encoding': 'chunked',
+          'X-Safety-Flag': safety.classification,
+          'X-Grounded': verification.isValid ? 'true' : 'false',
+        },
+      })
+    } catch (error) {
+      const errorMsg = error instanceof Error ? error.message : String(error)
+      console.error('RAG pipeline error:', errorMsg)
+
+      const streamMessages: StreamMessage[] = [
+        {
+          type: 'error',
+          data: {
+            message:
+              'I encountered an issue retrieving relevant teachings. Could you rephrase your question or provide more context? This helps me find the most relevant guidance for your situation.',
+            error: errorMsg,
+          },
+        },
+      ]
+
+      return new Response(streamJSON(streamMessages), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/x-ndjson; charset=utf-8',
+          'X-Safety-Flag': safety.classification,
+          'X-Error': 'true',
+        },
+      })
+    }
   } catch (error) {
     console.error('Chat error:', error)
-    return new Response('Failed to process chat message', {
-      status: 400,
-    })
+    return new Response(
+      JSON.stringify({
+        type: 'error',
+        data: {
+          message: 'Failed to process chat message',
+          error: error instanceof Error ? error.message : String(error),
+        },
+      }),
+      {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      },
+    )
   }
 }
