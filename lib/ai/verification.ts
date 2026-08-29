@@ -42,6 +42,7 @@ CRITICAL GROUNDING RULES:
 2. Every citation MUST be a verse reference (e.g., "Bg. 2.47", "SB 1.15") that appears in the retrieval context.
 3. If you cite a verse ref that is NOT in the provided list, your response FAILS.
 4. If no verses are relevant, say so honestly. Do NOT fabricate or cite verses.
+5. Excerpt MUST be a single contiguous span of text from the source — no internal ellipsis (...) joining non-adjacent parts. Pick contiguous phrases only, even if shorter than 15 words.
 
 OUTPUT FORMAT (MUST be valid JSON, nothing else):
 {
