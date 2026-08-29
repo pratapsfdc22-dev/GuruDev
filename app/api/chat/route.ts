@@ -45,7 +45,6 @@ interface StreamMessage {
 
 function streamJSON(messages: StreamMessage[]): ReadableStream<Uint8Array> {
   const encoder = new TextEncoder()
-  let messageIndex = 0
 
   return new ReadableStream({
     async start(controller) {
