@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Header } from '@/components/Header'
+import { LogoWithText } from '@/components/LogoWithText'
 
 export default function Home(): React.ReactElement {
   const router = useRouter()
@@ -34,18 +34,9 @@ export default function Home(): React.ReactElement {
       <Header />
       <main className="flex flex-1 flex-col items-center justify-center p-4">
         <div className="max-w-4xl w-full space-y-12 text-center">
-          {/* Logo */}
-          <div className="flex justify-center mb-16">
-            <div className="w-full max-w-2xl">
-              <Image
-                src="/logo.png"
-                alt="Guru Dev - Your Ever Well Wisher"
-                width={600}
-                height={200}
-                priority
-                className="w-full h-auto object-contain"
-              />
-            </div>
+          {/* Logo - Centered on home page */}
+          <div className="flex justify-center mb-8 scale-150">
+            <LogoWithText href={false} size="default" />
           </div>
 
         {/* Tagline */}

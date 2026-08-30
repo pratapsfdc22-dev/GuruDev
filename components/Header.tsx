@@ -1,7 +1,6 @@
 'use client'
 
-import Image from 'next/image'
-import Link from 'next/link'
+import { LogoWithText } from '@/components/LogoWithText'
 
 interface HeaderProps {
   userEmail?: string
@@ -20,18 +19,9 @@ export function Header({ userEmail, showSignOut = false, onSignOut }: HeaderProp
     <header className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 border-b border-slate-700 px-4 py-3 flex-shrink-0">
       <div className="max-w-6xl mx-auto flex justify-between items-center gap-4">
         {/* Logo + Branding */}
-        <Link href={userEmail ? '/chat' : '/'} className="flex items-center gap-3 hover:opacity-80 transition">
-          <div className="relative w-32 h-auto">
-            <Image
-              src="/logo.png"
-              alt="Guru Dev"
-              width={128}
-              height={43}
-              priority
-              className="h-8 w-auto object-contain"
-            />
-          </div>
-        </Link>
+        <div className="hover:opacity-80 transition">
+          <LogoWithText href={userEmail ? '/chat' : '/'} size="default" />
+        </div>
 
         {/* Right side: User info + Sign Out */}
         {showSignOut && userEmail && (
