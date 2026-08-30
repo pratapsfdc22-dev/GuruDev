@@ -32,20 +32,14 @@ export default function Home(): React.ReactElement {
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950">
       <div className="max-w-2xl w-full space-y-12 text-center">
         {/* Logo */}
-        <div className="flex justify-center mb-8">
-          <Logo size="large" />
+        <div className="flex justify-center mb-12">
+          <Logo size="large" variant="horizontal" />
         </div>
 
-        {/* Title and Subtitle */}
-        <div className="space-y-6">
-          <h1 className="text-6xl font-serif font-bold text-slate-50 tracking-wide">
-            GURU DEV
-          </h1>
-          <p className="text-xl text-slate-300 font-serif tracking-widest">
-            YOUR EVER WELL WISHER
-          </p>
-          <p className="text-slate-400 text-lg leading-relaxed max-w-xl mx-auto">
-            Virtual guru chat interface with guidance grounded in Vedic scriptures
+        {/* Tagline */}
+        <div className="space-y-2">
+          <p className="text-slate-300 text-lg leading-relaxed max-w-xl mx-auto">
+            Chat with Guru Dev — spiritual guidance grounded in Vedic scriptures
           </p>
         </div>
 
