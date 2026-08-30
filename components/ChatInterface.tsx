@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { Message } from '@/types'
-import { Logo } from '@/components/Logo'
 
 interface Citation {
   ref: string
@@ -149,10 +148,7 @@ export function ChatInterface(): React.ReactElement {
     <div className="flex flex-col h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !streamingContent && (
-          <div className="text-center py-16 space-y-6">
-            <div className="flex justify-center">
-              <Logo size="large" />
-            </div>
+          <div className="text-center py-16 space-y-4">
             <div className="space-y-2">
               <p className="text-slate-100 text-lg font-serif">Welcome to Guru Dev</p>
               <p className="text-slate-400 text-sm">
