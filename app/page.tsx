@@ -36,7 +36,7 @@ export default function Home(): React.ReactElement {
         <div className="max-w-4xl w-full space-y-12 text-center">
           {/* Logo - Centered on home page */}
           <div className="flex justify-center mb-8 scale-150">
-            <LogoWithText href={false} size="default" />
+            <LogoWithText size="default" />
           </div>
 
         {/* Tagline */}

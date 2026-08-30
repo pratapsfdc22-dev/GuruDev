@@ -4,11 +4,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 interface LogoWithTextProps {
-  href?: string
+  href?: string | null
   size?: 'small' | 'default'
 }
 
-export function LogoWithText({ href = '/', size = 'default' }: LogoWithTextProps): React.ReactElement {
+export function LogoWithText({ href, size = 'default' }: LogoWithTextProps): React.ReactElement {
   const sizeConfig = {
     small: { iconSize: 32, iconW: 32, iconH: 32, textSize: 'text-sm', taglineSize: 'text-xs' },
     default: { iconSize: 40, iconW: 40, iconH: 40, textSize: 'text-base', taglineSize: 'text-xs' },
