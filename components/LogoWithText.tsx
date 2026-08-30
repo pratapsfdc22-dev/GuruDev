@@ -23,14 +23,15 @@ export function LogoWithText({ href, size = 'default' }: LogoWithTextProps): Rea
         width={config.iconW}
         height={config.iconH}
         alt="Guru Dev"
-        className="rounded-full"
+        className="rounded-full flex-shrink-0"
         priority
+        unoptimized
       />
-      <div className="flex flex-col">
-        <div className={`font-serif font-bold text-slate-50 leading-tight ${config.textSize}`}>
+      <div className="flex flex-col gap-0 min-w-0">
+        <div className={`font-serif font-bold text-slate-50 leading-tight whitespace-nowrap ${config.textSize}`}>
           Guru Dev
         </div>
-        <div className={`text-slate-400 leading-tight ${config.taglineSize}`}>
+        <div className={`text-slate-400 leading-tight whitespace-nowrap ${config.taglineSize}`}>
           Your Ever Well-Wisher
         </div>
       </div>
