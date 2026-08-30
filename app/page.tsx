@@ -30,10 +30,12 @@ export default function Home(): React.ReactElement {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950">
-      <div className="max-w-2xl w-full space-y-12 text-center">
+      <div className="max-w-4xl w-full space-y-12 text-center">
         {/* Logo */}
-        <div className="flex justify-center mb-12">
-          <Logo size="large" variant="horizontal" />
+        <div className="flex justify-center mb-16">
+          <div className="w-full max-w-2xl">
+            <Logo size="large" variant="horizontal" />
+          </div>
         </div>
 
         {/* Tagline */}
