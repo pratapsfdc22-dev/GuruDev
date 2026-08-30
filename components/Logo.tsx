@@ -5,12 +5,6 @@ export function Logo({ size = 'default' }: { size?: 'small' | 'default' | 'large
     large: 'w-16 h-16',
   }
 
-  const textSizeMap = {
-    small: 'text-lg',
-    default: 'text-2xl',
-    large: 'text-4xl',
-  }
-
   return (
     <div className={`flex items-center gap-2 ${sizeMap[size]}`}>
       <div className="relative w-full h-full">
