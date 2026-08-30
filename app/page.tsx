@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
-import { Logo } from '@/components/Logo'
+import { Header } from '@/components/Header'
 
 export default function Home(): React.ReactElement {
   const router = useRouter()
@@ -29,14 +29,20 @@ export default function Home(): React.ReactElement {
   }, [supabase, router])
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950">
-      <div className="max-w-4xl w-full space-y-12 text-center">
-        {/* Logo */}
-        <div className="flex justify-center mb-16">
-          <div className="w-full max-w-2xl">
-            <Logo size="large" variant="horizontal" />
+    <div className="flex flex-col min-h-screen bg-gradient-to-br from-gray-900 via-slate-900 to-gray-950">
+      <Header />
+      <main className="flex flex-1 flex-col items-center justify-center p-4">
+        <div className="max-w-4xl w-full space-y-12 text-center">
+          {/* Logo */}
+          <div className="flex justify-center mb-16">
+            <div className="w-full max-w-2xl">
+              <img
+                src="/logo.png"
+                alt="Guru Dev - Your Ever Well Wisher"
+                className="w-full h-auto object-contain max-w-xl"
+              />
+            </div>
           </div>
-        </div>
 
         {/* Tagline */}
         <div className="space-y-2">
@@ -68,6 +74,7 @@ export default function Home(): React.ReactElement {
           </Link>
         </div>
       </div>
-    </main>
+      </main>
+    </div>
   )
 }
