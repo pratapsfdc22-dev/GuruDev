@@ -17,6 +17,8 @@ export default function ResetPasswordPage(): React.ReactElement {
   const supabase = createClient()
 
   useEffect(() => {
+    let unsubscribe: (() => void) | null = null
+
     const verifyToken = async (): Promise<void> => {
       try {
         // Supabase automatically handles the token from URL hash, but we need to wait for it
@@ -32,14 +34,12 @@ export default function ResetPasswordPage(): React.ReactElement {
           const { data } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'PASSWORD_RECOVERY' && session) {
               setValidToken(true)
-            } else if (!session && !validToken) {
+            } else if (!session) {
               setError('Invalid or expired reset link. Please request a new one.')
             }
           })
 
-          return () => {
-            data?.subscription?.unsubscribe()
-          }
+          unsubscribe = data?.subscription?.unsubscribe ?? null
         }
       } catch (err) {
         setError('Failed to verify reset link')
@@ -48,6 +48,10 @@ export default function ResetPasswordPage(): React.ReactElement {
     }
 
     verifyToken()
+
+    return () => {
+      unsubscribe?.()
+    }
   }, [supabase])
 
   const handleSubmit = async (e: React.FormEvent): Promise<void> => {
