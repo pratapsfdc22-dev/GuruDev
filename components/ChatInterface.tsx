@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import type { Message } from '@/types'
+import { Logo } from '@/components/Logo'
 
 interface Citation {
   ref: string
@@ -145,14 +146,19 @@ export function ChatInterface(): React.ReactElement {
   }
 
   return (
-    <div className="flex flex-col h-full w-full">
+    <div className="flex flex-col h-full w-full bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && !streamingContent && (
-          <div className="text-center text-gray-500 py-8">
-            <p>Start a conversation with Guru Dev</p>
-            <p className="text-xs mt-2 text-gray-400">
-              Ask any question about stress, purpose, relationships, work, or daily life
-            </p>
+          <div className="text-center py-16 space-y-6">
+            <div className="flex justify-center">
+              <Logo size="large" />
+            </div>
+            <div className="space-y-2">
+              <p className="text-slate-100 text-lg font-serif">Welcome to Guru Dev</p>
+              <p className="text-slate-400 text-sm">
+                Ask any question about stress, purpose, relationships, work, or daily life
+              </p>
+            </div>
           </div>
         )}
 
@@ -161,27 +167,27 @@ export function ChatInterface(): React.ReactElement {
             <div
               className={`max-w-2xl p-4 rounded-lg break-words ${
                 msg.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-50'
+                  ? 'bg-yellow-600 text-white'
+                  : 'bg-slate-800 text-slate-50'
               }`}
             >
               <p className="whitespace-pre-wrap">{msg.content}</p>
 
               {/* Citation cards */}
               {msg.cited_verses && msg.cited_verses.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-gray-300 dark:border-gray-600 space-y-3">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">📚 Sources</p>
+                <div className="mt-4 pt-3 border-t border-slate-700 space-y-3">
+                  <p className="text-xs font-semibold text-slate-400">📚 Sources</p>
                   {msg.cited_verses.map((cite, cIdx) => (
                     <div
                       key={cIdx}
-                      className="p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500 transition"
+                      className="p-3 bg-slate-700 rounded border border-slate-600 hover:border-yellow-500 transition"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                          <p className="font-semibold text-sm text-slate-100">
                             {cite.ref}
                           </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
+                          <p className="text-xs text-slate-300 mt-1 italic">
                             "{cite.excerpt}"
                           </p>
                         </div>
@@ -189,7 +195,7 @@ export function ChatInterface(): React.ReactElement {
                           href={cite.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-shrink-0 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 bg-blue-50 dark:bg-blue-900/20 rounded hover:bg-blue-100 dark:hover:bg-blue-900/40 transition"
+                          className="flex-shrink-0 px-3 py-1 text-xs font-medium text-yellow-400 hover:text-yellow-300 bg-yellow-900/30 rounded hover:bg-yellow-900/50 transition"
                         >
                           Read →
                         </a>
@@ -204,23 +210,23 @@ export function ChatInterface(): React.ReactElement {
 
         {isLoading && streamingContent && (
           <div className="flex justify-start">
-            <div className="max-w-2xl p-4 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-50 break-words">
+            <div className="max-w-2xl p-4 rounded-lg bg-slate-800 text-slate-50 break-words">
               <p className="whitespace-pre-wrap">{streamingContent}</p>
 
               {streamingCitations.length > 0 && (
-                <div className="mt-4 pt-3 border-t border-gray-300 dark:border-gray-600 space-y-3">
-                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400">📚 Sources</p>
+                <div className="mt-4 pt-3 border-t border-slate-700 space-y-3">
+                  <p className="text-xs font-semibold text-slate-400">📚 Sources</p>
                   {streamingCitations.map((cite, cIdx) => (
                     <div
                       key={cIdx}
-                      className="p-3 bg-white dark:bg-gray-700 rounded border border-gray-200 dark:border-gray-600"
+                      className="p-3 bg-slate-700 rounded border border-slate-600"
                     >
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex-1">
-                          <p className="font-semibold text-sm text-gray-900 dark:text-gray-100">
+                          <p className="font-semibold text-sm text-slate-100">
                             {cite.ref}
                           </p>
-                          <p className="text-xs text-gray-600 dark:text-gray-400 mt-1 italic">
+                          <p className="text-xs text-slate-300 mt-1 italic">
                             "{cite.excerpt}"
                           </p>
                         </div>
@@ -228,7 +234,7 @@ export function ChatInterface(): React.ReactElement {
                           href={cite.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="flex-shrink-0 px-3 py-1 text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 rounded"
+                          className="flex-shrink-0 px-3 py-1 text-xs font-medium text-yellow-400 bg-yellow-900/30 rounded"
                         >
                           Read →
                         </a>
@@ -238,15 +244,15 @@ export function ChatInterface(): React.ReactElement {
                 </div>
               )}
 
-              <span className="inline-block w-2 h-5 bg-gray-500 ml-1 animate-pulse" />
+              <span className="inline-block w-2 h-5 bg-slate-600 ml-1 animate-pulse" />
             </div>
           </div>
         )}
 
         {isLoading && !streamingContent && (
           <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg animate-pulse">
-              <p className="text-gray-600 dark:text-gray-400">Guru Dev is thinking...</p>
+            <div className="bg-slate-800 p-4 rounded-lg animate-pulse">
+              <p className="text-slate-400">Guru Dev is thinking...</p>
             </div>
           </div>
         )}
@@ -256,7 +262,7 @@ export function ChatInterface(): React.ReactElement {
 
       <form
         onSubmit={handleSubmit}
-        className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900"
+        className="p-4 border-t border-slate-800 bg-slate-900"
       >
         <div className="flex gap-2">
           <input
@@ -265,13 +271,13 @@ export function ChatInterface(): React.ReactElement {
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask your question..."
             disabled={isLoading}
-            className="flex-1 px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg dark:bg-gray-800 dark:text-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+            className="flex-1 px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-slate-50 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent disabled:opacity-50"
             autoFocus
           />
           <button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition"
+            className="px-6 py-3 bg-gradient-to-r from-yellow-600 to-yellow-700 hover:from-yellow-700 hover:to-yellow-800 text-white rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed transition shadow-lg hover:shadow-yellow-600/50"
           >
             {isLoading ? 'Streaming...' : 'Send'}
           </button>
