@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
@@ -36,10 +37,13 @@ export default function Home(): React.ReactElement {
           {/* Logo */}
           <div className="flex justify-center mb-16">
             <div className="w-full max-w-2xl">
-              <img
+              <Image
                 src="/logo.png"
                 alt="Guru Dev - Your Ever Well Wisher"
-                className="w-full h-auto object-contain max-w-xl"
+                width={600}
+                height={200}
+                priority
+                className="w-full h-auto object-contain"
               />
             </div>
           </div>

@@ -2,7 +2,6 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
   userEmail?: string
@@ -11,8 +10,6 @@ interface HeaderProps {
 }
 
 export function Header({ userEmail, showSignOut = false, onSignOut }: HeaderProps): React.ReactElement {
-  const router = useRouter()
-
   const handleSignOut = async (): Promise<void> => {
     if (onSignOut) {
       await onSignOut()
